@@ -2832,7 +2832,12 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
     if (apply)
     {
         uint32 creatureEntry = GetMiscValue();
-
+       if (aurApp->GetBase()->GetId() == 87840)
+                       {
+       target->Mount(player->getGender() == GENDER_FEMALE ? 29423 : 29422, 0, GetMiscValue());
+       target->Mount(player->getGender() == GENDER_MALE ? 29422 : 29423, 0, GetMiscValue());
+       return;
+       }
         // Festive Holiday Mount
         if (target->HasAura(62061))
         {
@@ -3106,14 +3111,27 @@ void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bo
     target->SetControlled(apply, UNIT_STATE_STUNNED);
 }
 
-void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bool apply) const
-{
-    if (!(mode & AURA_EFFECT_HANDLE_REAL))
-        return;
+void AuraEffect::HandleAuraModRoot(AuraApplication const *aurApp, uint8 mode,
+		bool apply) const {
+	if (!(mode & AURA_EFFECT_HANDLE_REAL))
+		return;
 
-    Unit* target = aurApp->GetTarget();
+	Unit *target = aurApp->GetTarget();
 
-    target->SetControlled(apply, UNIT_STATE_ROOT);
+	target->SetControlled(apply, UNIT_STATE_ROOT);
+
+	if (apply) {
+		switch (GetSpellInfo()->Id) {
+		case 69001: //Transform: Worgen. not used?
+		{
+			if (target->GetTypeId() == TYPEID_PLAYER)
+				target->ToPlayer()->setInWorgenForm();
+			break;
+		}
+		default:
+			break;
+		}
+	}
 }
 
 void AuraEffect::HandlePreventFleeing(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -5424,6 +5442,18 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             target->PlayDirectSound(14972, target->ToPlayer());
                     }
                     break;
+				case 87840: //Rune wild
+					if (target->GetTypeId() == TYPEID_PLAYER
+						&& target->HasAura(87840)) {
+					if (target->HasSpell(33391)) // Journeyman Riding
+						target->ToPlayer()->SetSpeed(MOVE_RUN, 2.0f, true);
+					else if (target->HasSpell(33388)) // Apprentice Riding
+						target->ToPlayer()->SetSpeed(MOVE_RUN, 1.6f, true);
+					} else
+						target->ToPlayer()->SetSpeed(MOVE_RUN, 1.0f, true);
+						target->ToPlayer()->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM3);
+						target->GetAuraEffectsByType(SPELL_AURA_MOUNTED).front()->GetMiscValue();
+					break;					
                 case 62061: // Festive Holiday Mount
                     if (target->HasAuraType(SPELL_AURA_MOUNTED))
                     {
