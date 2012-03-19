@@ -9912,6 +9912,7 @@ Unit* Unit::GetCharm() const
 
 void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
 {
+
     sLog->outDebug(LOG_FILTER_UNITS, "SetMinion %u for %u, apply %u", minion->GetEntry(), GetEntry(), apply);
 
     if (apply)
@@ -9963,7 +9964,7 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
 
         if (GetTypeId() == TYPEID_PLAYER)
         {
-            // If its not a Hunter Pet, only set pet slot. use setPetSlotUsed only for hanter pets.
+            // If its not a Hunter Pet, only set pet slot. use setPetSlotUsed only for hunter pets.
             // Always save thoose spots where hunter is correct
             if (!minion->isHunterPet())
                 ToPlayer()->_currentPetSlot = slot;
@@ -9971,7 +9972,8 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
             {
                 ToPlayer()->_currentPetSlot = slot;
                 ToPlayer()->setPetSlotUsed(slot, true);
-            }else
+            }
+            else
             {
                 sLog->outCrash("Unit::SetMinion. Try to add hunter pet to not alawed slot(%u). Minion %u for %u", slot, minion->GetEntry(), GetEntry());
                 ASSERT(false);
