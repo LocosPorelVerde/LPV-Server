@@ -488,6 +488,23 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage = (m_caster->getLevel() - 60) * 4 + 60;
                         break;
                     }
+						// Rocket Barrage, Goblin racial spell
+					case 69041:
+					{
+						damage =
+								uint32(
+										1
+												+ (0.25f
+														* m_caster->GetTotalAttackPowerValue(
+																BASE_ATTACK))
+												+ (0.429f
+														* m_caster->SpellBaseDamageBonus(
+																SPELL_SCHOOL_MASK_FIRE))
+												+ (m_caster->getLevel() * 2)
+												+ (m_caster->GetStat(
+														STAT_INTELLECT)
+														* 0.50193f));
+					}					
                 }
                 break;
             }
@@ -5945,6 +5962,21 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_MAGE:
+        {
+            if (m_spellInfo->Id == 11129) //Combustion
+            {
+                //I assume initial periodic damage is 0 if no Dots on target
+                int32 bp = 0;
+                Unit::AuraEffectList const &mPeriodic =    unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                //Cycle trough all periodic auras to increase Combustion periodic damage
+                for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)                           
+                if ((*i)->GetCasterGUID() == m_caster->GetGUID())
+                bp += (*i)->GetAmount();                      
+                m_caster->CastCustomSpell(unitTarget, 29977, &bp,NULL, NULL, true);
+            }
+            break;
+        }		
         case SPELLFAMILY_HUNTER:
         {
             switch (m_spellInfo->Id)
